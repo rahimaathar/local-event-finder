@@ -1,0 +1,107 @@
+[
+  {
+    "id": "1",
+    "name": { "text": "Tech Conference 2025" },
+    "description": {
+      "text": "Annual technology conference featuring the latest innovations."
+    },
+    "start": { "local": "2025-08-20T09:00:00" },
+    "url": "https://example.com/event/1",
+    "venue": {
+      "name": "Moscone Center",
+      "latitude": "37.7841",
+      "longitude": "-122.4000",
+      "address": {
+        "localized_address_display": "747 Howard St, San Francisco, CA"
+      }
+    },
+    "ticket_availability": {
+      "has_available_tickets": true,
+      "minimum_ticket_price": { "display": "$299" }
+    },
+    "category": "technology"
+  },
+  {
+    "id": "2",
+    "name": { "text": "Tech Conference 2025" },
+    "description": {
+      "text": "Annual technology conference with workshops and speakers."
+    },
+    "start": { "local": "2025-08-22T09:00:00" },
+    "url": "https://example.com/event/2",
+    "venue": {
+      "name": "Moscone Center",
+      "latitude": "37.7840",
+      "longitude": "-122.4011",
+      "address": {
+        "localized_address_display": "747 Howard St, San Francisco, CA"
+      }
+    },
+    "ticket_availability": {
+      "has_available_tickets": true,
+      "minimum_ticket_price": { "display": "$99" }
+    },
+    "category": "tech"
+  },
+  {
+    "id": "3",
+    "name": { "text": "Art & Wine Festival" },
+    "description": {
+      "text": "A festival featuring local artists and wine tasting."
+    },
+    "start": { "local": "2025-08-23T12:00:00" },
+    "url": "https://example.com/event/3",
+    "venue": {
+      "name": "Union Square",
+      "latitude": "37.7879",
+      "longitude": "-122.4075",
+      "address": {
+        "localized_address_display": "333 Post St, San Francisco, CA"
+      }
+    },
+    "ticket_availability": {
+      "has_available_tickets": false
+    },
+    "category": "arts"
+  },
+  {
+    "id": "4",
+    "name": { "text": "Community Soccer Match" },
+    "description": { "text": "Local teams compete in a friendly match." },
+    "start": { "local": "2025-08-24T15:00:00" },
+    "url": "https://example.com/event/4",
+    "venue": {
+      "name": "Bayview Soccer Field",
+      "latitude": "37.7520",
+      "longitude": "-122.4148",
+      "address": {
+        "localized_address_display": "500 Bayview St, San Francisco, CA"
+      }
+    },
+    "ticket_availability": {
+      "has_available_tickets": true,
+      "minimum_ticket_price": { "display": "Free" }
+    },
+    "category": "sports"
+  },
+  {
+    "id": "5",
+    "name": { "text": "Food & Wine Festival" },
+    "description": { "text": "Taste the finest local cuisines and wines." },
+    "start": { "local": "2025-08-23T12:00:00" },
+    "url": "https://example.com/event/5",
+    "venue": {
+      "name": "Ferry Building",
+      "latitude": "37.7955",
+      "longitude": "-122.3937",
+      "address": {
+        "localized_address_display": "1 Ferry Building, San Francisco, CA"
+      }
+    },
+    "ticket_availability": {
+      "has_available_tickets": true,
+      "minimum_ticket_price": { "display": "$75" }
+    },
+    "category": "food-and-drink"
+  }
+]
