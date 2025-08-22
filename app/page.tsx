@@ -15,6 +15,7 @@ export default function Home() {
   const [dateFilter, setDateFilter] = useState("all");
   const [isLoading, setIsLoading] = useState(false);
   const [sortBy, setSortBy] = useState("date");
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
 
   const filteredEvents = useMemo(() => {
     setIsLoading(true);
@@ -167,6 +168,14 @@ export default function Home() {
     return { text: 'Upcoming', color: 'bg-purple-100 text-purple-800' };
   };
 
+  const handleEventSelect = (event: any) => {
+    setSelectedEvent(event);
+  };
+
+  const handleEventDeselect = () => {
+    setSelectedEvent(null);
+  };
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-blue-50">
       <div className="container mx-auto px-4 py-8">
@@ -184,11 +193,11 @@ export default function Home() {
               <select
                 value={selectedState}
                 onChange={handleStateChange}
-                className="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white/50"
+                className="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white/50 text-gray-900"
               >
-                <option value="">All States</option>
+                <option value="" className="text-gray-900">All States</option>
                 {states.map(state => (
-                  <option key={state.value} value={state.value}>
+                  <option key={state.value} value={state.value} className="text-gray-900">
                     {state.label}
                   </option>
                 ))}
@@ -200,13 +209,13 @@ export default function Home() {
               <select
                 value={selectedCity}
                 onChange={handleCityChange}
-                className="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all disabled:bg-gray-50 disabled:text-gray-500 bg-white/50"
+                className="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all disabled:bg-gray-100 disabled:text-gray-400 bg-white/50 text-gray-900"
                 disabled={!selectedState}
               >
-                <option value="">All Cities</option>
+                <option value="" className="text-gray-900">All Cities</option>
                 {selectedState &&
                   cities[selectedState].map(city => (
-                    <option key={city.value} value={city.value}>
+                    <option key={city.value} value={city.value} className="text-gray-900">
                       {city.label}
                     </option>
                   ))}
@@ -218,10 +227,10 @@ export default function Home() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white/50"
+                className="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white/50 text-gray-900"
               >
                 {categories.map(category => (
-                  <option key={category.value} value={category.value}>
+                  <option key={category.value} value={category.value} className="text-gray-900">
                     {category.label}
                   </option>
                 ))}
@@ -233,13 +242,13 @@ export default function Home() {
               <select
                 value={dateFilter}
                 onChange={(e) => setDateFilter(e.target.value)}
-                className="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white/50"
+                className="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white/50 text-gray-900"
               >
-                <option value="all">All Dates</option>
-                <option value="today">Today</option>
-                <option value="tomorrow">Tomorrow</option>
-                <option value="week">This Week</option>
-                <option value="month">This Month</option>
+                <option value="all" className="text-gray-900">All Dates</option>
+                <option value="today" className="text-gray-900">Today</option>
+                <option value="tomorrow" className="text-gray-900">Tomorrow</option>
+                <option value="week" className="text-gray-900">This Week</option>
+                <option value="month" className="text-gray-900">This Month</option>
               </select>
             </div>
           </div>
@@ -276,11 +285,11 @@ export default function Home() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white/50"
+                className="w-full p-3 rounded-xl border-2 border-gray-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all bg-white/50 text-gray-900"
               >
-                <option value="date">Date</option>
-                <option value="name">Name</option>
-                <option value="price">Price</option>
+                <option value="date" className="text-gray-900">Date</option>
+                <option value="name" className="text-gray-900">Name</option>
+                <option value="price" className="text-gray-900">Price</option>
               </select>
             </div>
           </div>
@@ -317,7 +326,11 @@ export default function Home() {
                     return (
                       <div
                         key={event.id}
-                        className="p-6 rounded-2xl border border-gray-100 hover:border-indigo-200 hover:shadow-xl transition-all duration-300 bg-white/60 backdrop-blur-sm group"
+                        className={`p-6 rounded-2xl border transition-all duration-300 bg-white/60 backdrop-blur-sm group cursor-pointer ${selectedEvent?.id === event.id
+                            ? 'border-indigo-500 shadow-xl bg-indigo-50/80'
+                            : 'border-gray-100 hover:border-indigo-200 hover:shadow-xl'
+                          }`}
+                        onClick={() => handleEventSelect(event)}
                       >
                         <div className="flex items-start justify-between mb-3">
                           <h3 className="font-bold text-lg text-gray-900 group-hover:text-indigo-700 transition-colors">
@@ -355,8 +368,8 @@ export default function Home() {
                             )}
                             {event.ticket_availability && (
                               <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${event.ticket_availability.has_available_tickets
-                                  ? 'bg-green-100 text-green-800'
-                                  : 'bg-red-100 text-red-800'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-red-100 text-red-800'
                                 }`}>
                                 {event.ticket_availability.has_available_tickets
                                   ? `From ${event.ticket_availability.minimum_ticket_price?.display || 'Free'}`
@@ -383,7 +396,13 @@ export default function Home() {
 
           <div className="lg:w-3/5">
             <div className="rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20 h-[800px] bg-white/80 backdrop-blur-sm">
-              <MapView userLocation={userLocation} events={filteredEvents} />
+              <MapView
+                userLocation={userLocation}
+                events={filteredEvents}
+                selectedEvent={selectedEvent}
+                onEventSelect={handleEventSelect}
+                onEventDeselect={handleEventDeselect}
+              />
             </div>
           </div>
         </div>

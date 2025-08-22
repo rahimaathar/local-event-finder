@@ -163,3 +163,33 @@ body {
   transform: translateY(-2px);
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
+
+/* Enhanced select dropdown styling for better visibility */
+select {
+  color: #111827 !important;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+}
+
+select option {
+  color: #111827 !important;
+  background-color: #ffffff !important;
+  padding: 8px 12px !important;
+}
+
+select option:hover {
+  background-color: #f3f4f6 !important;
+}
+
+select:focus {
+  background-color: #ffffff !important;
+}
+
+/* Ensure disabled select still has visible text */
+select:disabled {
+  color: #6b7280 !important;
+  background-color: #f9fafb !important;
+}
+
+select:disabled option {
+  color: #6b7280 !important;
+}

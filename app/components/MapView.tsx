@@ -33,6 +33,9 @@ interface MapViewProps {
         longitude: number;
     };
     events: Event[];
+    selectedEvent?: Event | null;
+    onEventSelect?: (event: Event) => void;
+    onEventDeselect?: () => void;
 }
 
 type MapViewState = {
@@ -44,7 +47,7 @@ type MapViewState = {
     pitch: number;
 };
 
-function MapView({ userLocation, events }: MapViewProps) {
+function MapView({ userLocation, events, selectedEvent: propSelectedEvent, onEventSelect, onEventDeselect }: MapViewProps) {
     const [viewState, setViewState] = useState<MapViewState>({
         latitude: userLocation.latitude,
         longitude: userLocation.longitude,
@@ -63,8 +66,38 @@ function MapView({ userLocation, events }: MapViewProps) {
         }));
     }, [userLocation]);
 
+    // Center map on selected event
+    useEffect(() => {
+        const currentSelectedEvent = propSelectedEvent || selectedEvent;
+        if (currentSelectedEvent) {
+            setViewState(v => ({
+                ...v,
+                latitude: Number(currentSelectedEvent.venue.latitude),
+                longitude: Number(currentSelectedEvent.venue.longitude),
+                zoom: 15 // Zoom in closer when event is selected
+            }));
+        }
+    }, [selectedEvent, propSelectedEvent]);
+
     const handleMove = (evt: { viewState: MapViewState }) => {
         setViewState(evt.viewState);
+    };
+
+    const handleMapClick = () => {
+        if (selectedEvent || propSelectedEvent) {
+            if (onEventDeselect) {
+                onEventDeselect();
+            } else {
+                setSelectedEvent(null);
+            }
+            // Return to user location when deselecting
+            setViewState(v => ({
+                ...v,
+                latitude: userLocation.latitude,
+                longitude: userLocation.longitude,
+                zoom: 13
+            }));
+        }
     };
 
     const getEventStatus = (dateString: string) => {
@@ -107,6 +140,7 @@ function MapView({ userLocation, events }: MapViewProps) {
         <Map
             {...viewState}
             onMove={handleMove}
+            onClick={handleMapClick}
             style={{ width: '100%', height: '100%' }}
             mapStyle="mapbox://styles/mapbox/light-v11"
             mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
@@ -132,15 +166,20 @@ function MapView({ userLocation, events }: MapViewProps) {
                         longitude={Number(event.venue.longitude)}
                         onClick={(e: { originalEvent: MouseEvent }) => {
                             e.originalEvent.stopPropagation();
-                            setSelectedEvent(event);
+                            if (onEventSelect) {
+                                onEventSelect(event);
+                            } else {
+                                setSelectedEvent(event);
+                            }
                         }}
                     >
-                        <div className="cursor-pointer transform hover:scale-125 transition-all duration-200 group">
+                        <div className={`cursor-pointer transform hover:scale-125 transition-all duration-200 group ${(selectedEvent?.id === event.id || propSelectedEvent?.id === event.id) ? 'scale-125' : ''}`}>
                             <div className="relative">
-                                <div className={`w-6 h-6 ${categoryColor} rounded-full border-3 border-white shadow-lg`} />
-                                <div className={`absolute -top-1 -right-1 w-3 h-3 ${status.color} rounded-full border border-white`} />
-                                <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                                    {event.name.text}
+                                <div className={`w-8 h-8 ${categoryColor} rounded-full border-4 border-white shadow-lg hover:shadow-xl transition-shadow ${(selectedEvent?.id === event.id || propSelectedEvent?.id === event.id) ? 'animate-bounce shadow-2xl' : 'animate-pulse'}`} />
+                                <div className={`absolute -top-1 -right-1 w-4 h-4 ${status.color} rounded-full border-2 border-white`} />
+                                <div className="absolute -bottom-10 left-1/2 transform -translate-x-1/2 bg-black text-white text-xs px-3 py-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10 shadow-lg max-w-48 text-center">
+                                    <div className="font-semibold">{event.name.text}</div>
+                                    <div className="text-xs opacity-75">{formatEventDate(event.start.local)}</div>
                                 </div>
                             </div>
                         </div>
@@ -148,24 +187,37 @@ function MapView({ userLocation, events }: MapViewProps) {
                 );
             })}
 
-            {selectedEvent && (
+            {(selectedEvent || propSelectedEvent) && (
                 <Popup
-                    latitude={Number(selectedEvent.venue.latitude)}
-                    longitude={Number(selectedEvent.venue.longitude)}
-                    onClose={() => setSelectedEvent(null)}
+                    latitude={Number((selectedEvent || propSelectedEvent)!.venue.latitude)}
+                    longitude={Number((selectedEvent || propSelectedEvent)!.venue.longitude)}
+                    onClose={() => {
+                        if (onEventDeselect) {
+                            onEventDeselect();
+                        } else {
+                            setSelectedEvent(null);
+                        }
+                        // Return to user location when closing popup
+                        setViewState(v => ({
+                            ...v,
+                            latitude: userLocation.latitude,
+                            longitude: userLocation.longitude,
+                            zoom: 13
+                        }));
+                    }}
                     closeButton={true}
                     closeOnClick={false}
                     className="z-50"
                     offset={30}
-                    maxWidth="300px"
+                    maxWidth="350px"
                 >
-                    <div className="p-4 max-w-xs">
+                    <div className="p-6 max-w-sm">
                         <div className="flex items-start justify-between mb-3">
                             <h3 className="font-bold text-lg text-gray-900 leading-tight">
-                                {selectedEvent.name.text}
+                                {(selectedEvent || propSelectedEvent)!.name.text}
                             </h3>
-                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(selectedEvent.category)} text-white ml-2`}>
-                                {selectedEvent.category}
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor((selectedEvent || propSelectedEvent)!.category)} text-white ml-2`}>
+                                {(selectedEvent || propSelectedEvent)!.category}
                             </span>
                         </div>
 
@@ -174,7 +226,7 @@ function MapView({ userLocation, events }: MapViewProps) {
                                 <svg className="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
-                                <p className="text-sm font-medium">{formatEventDate(selectedEvent.start.local)}</p>
+                                <p className="text-sm font-medium">{formatEventDate((selectedEvent || propSelectedEvent)!.start.local)}</p>
                             </div>
 
                             <div className="flex items-start gap-2 text-gray-600">
@@ -183,27 +235,27 @@ function MapView({ userLocation, events }: MapViewProps) {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
                                 <div>
-                                    <p className="text-sm font-semibold text-gray-900">{selectedEvent.venue.name}</p>
-                                    <p className="text-sm text-gray-500">{selectedEvent.venue.address.localized_address_display}</p>
+                                    <p className="text-sm font-semibold text-gray-900">{(selectedEvent || propSelectedEvent)!.venue.name}</p>
+                                    <p className="text-sm text-gray-500">{(selectedEvent || propSelectedEvent)!.venue.address.localized_address_display}</p>
                                 </div>
                             </div>
                         </div>
 
-                        {selectedEvent.ticket_availability && (
+                        {(selectedEvent || propSelectedEvent)!.ticket_availability && (
                             <div className="mb-4">
-                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${selectedEvent.ticket_availability.has_available_tickets
-                                        ? 'bg-green-100 text-green-800'
-                                        : 'bg-red-100 text-red-800'
+                                <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${(selectedEvent || propSelectedEvent)!.ticket_availability!.has_available_tickets
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-red-100 text-red-800'
                                     }`}>
-                                    {selectedEvent.ticket_availability.has_available_tickets
-                                        ? `From ${selectedEvent.ticket_availability.minimum_ticket_price?.display || 'Free'}`
+                                    {(selectedEvent || propSelectedEvent)!.ticket_availability!.has_available_tickets
+                                        ? `From ${(selectedEvent || propSelectedEvent)!.ticket_availability!.minimum_ticket_price?.display || 'Free'}`
                                         : 'Sold Out'}
                                 </span>
                             </div>
                         )}
 
                         <a
-                            href={selectedEvent.url}
+                            href={(selectedEvent || propSelectedEvent)!.url}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center justify-center w-full px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
